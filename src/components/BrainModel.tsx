@@ -106,9 +106,12 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
       clearcoat: 0.3,
       clearcoatRoughness: 0.4,
       transparent: true,
+      opacity: isEnclosed ? 0 : 1,
+      depthWrite: !isEnclosed,
       side: THREE.DoubleSide,
     });
-  }, [color]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [color, isEnclosed]);
 
   useFrame(() => {
     if (!meshRef.current) return;
@@ -134,6 +137,8 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
       targetOpacity = 0.9;
     }
     mat.opacity += (targetOpacity - mat.opacity) * lerpSpeed;
+    // Disable depth write when semi-transparent so enclosed structures show through
+    mat.depthWrite = mat.opacity > 0.9;
 
     if (isSelected) {
       mat.emissive.set(color);
@@ -170,6 +175,7 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
       ref={meshRef}
       geometry={geometry}
       material={material}
+      renderOrder={isEnclosed ? 10 : 0}
       onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
