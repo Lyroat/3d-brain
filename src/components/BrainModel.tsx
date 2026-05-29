@@ -47,6 +47,7 @@ const COLORS: Record<string, string> = {
   'putamen': '#d946ef',
   'pallidum': '#fb923c',
   'accumbens': '#f43f5e',
+  'subthalamic-nucleus': '#ff6b35',
   // Limbic
   'hippocampus': '#f97316',
   'amygdala': '#ef4444',
@@ -72,6 +73,7 @@ const MESH_ALIASES: Record<string, string> = {
 // Regions that are enclosed inside other structures and should be hidden by default
 const ENCLOSED_REGIONS: Record<string, string> = {
   'substantia-nigra': 'brainstem',
+  'subthalamic-nucleus': 'thalamus',
 };
 
 function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.BufferGeometry }) {

@@ -323,6 +323,15 @@
     "triangles": 12496,
     "vertices": 6246
   },
+  "subthalamic-nucleus": {
+    "centroid": [
+      0.017460379841899083,
+      -0.0047623170847611975,
+      -0.11362147940830751
+    ],
+    "triangles": 400,
+    "vertices": 242
+  },
   "brainstem": {
     "centroid": [
       -0.03668494831349248,

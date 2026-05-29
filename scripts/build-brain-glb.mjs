@@ -78,6 +78,9 @@ const REGION_MAP = [
   { name: 'thalamus', source: 'subcortical', merge: 'both-separate', parcels: { lh: ['Left-Thalamus-Proper'], rh: ['Right-Thalamus-Proper'] } },
   { name: 'hypothalamus', source: 'subcortical', merge: 'both-separate', parcels: { lh: ['Left-VentralDC'], rh: ['Right-VentralDC'] } },
 
+  // === BASAL GANGLIA (additional) ===
+  { name: 'subthalamic-nucleus', source: 'procedural', merge: 'both', parcels: [] },
+
   // === BRAINSTEM ===
   { name: 'brainstem', source: 'subcortical', merge: 'both', parcels: ['Brain-Stem'] },
   { name: 'substantia-nigra', source: 'procedural', merge: 'both', parcels: [] },
@@ -299,9 +302,14 @@ function main() {
     // Handle procedural geometry
     if (region.source === 'procedural') {
       let merged;
+      if (region.name === 'subthalamic-nucleus') {
+        // STN: small lens-shaped nucleus ventral to thalamus, MNI ~(±12, -15, -5)
+        const left = createEllipsoid(-12, -15, -5, 2, 3, 1.2, 10);
+        const right = createEllipsoid(12, -15, -5, 2, 3, 1.2, 10);
+        merged = mergeGeometries([left, right]);
+      }
       if (region.name === 'substantia-nigra') {
-        // MNI coords: brainstem Y=[-57.6, -18.2] Z=[-63.8, -8.3]
-        // SN in ventral midbrain (superior brainstem): Y~-28, Z~-16, small radii for full enclosure
+        // SN in ventral midbrain, fully inside brainstem
         const left = createEllipsoid(-5, -28, -16, 1.5, 2.5, 1.5, 12);
         const right = createEllipsoid(5, -28, -16, 1.5, 2.5, 1.5, 12);
         merged = mergeGeometries([left, right]);

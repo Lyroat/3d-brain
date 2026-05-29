@@ -53,6 +53,7 @@ export const REGION_DATA: Record<string, RegionInfo> = {
   'putamen': { name: 'putamen', label: '壳核', description: '基底神经节的核心结构，与尾状核合称纹状体，参与运动学习和执行。', functions: ['运动学习', '运动执行', '强化学习'] },
   'pallidum': { name: 'pallidum', label: '苍白球', description: '基底神经节的输出结构，调节运动的启动和抑制。', functions: ['运动调节', '动作选择', '运动抑制'] },
   'accumbens': { name: 'accumbens', label: '伏隔核', description: '奖赏回路的核心，介导快乐、动机和成瘾行为。属于腹侧纹状体。', functions: ['奖赏处理', '动机', '快乐体验', '成瘾'] },
+  'subthalamic-nucleus': { name: 'subthalamic-nucleus', label: '丘脑下核（STN）', description: '位于丘脑腹侧、内囊内侧的小型透镜状核团。在基底神经节间接通路中起关键兴奋性驱动作用，调节运动抑制。深部脑刺激（DBS）治疗帕金森病的主要靶点。', functions: ['运动抑制', '冲动控制', '决策阈值', 'DBS靶点'] },
 
   // === 边缘系统 ===
   'hippocampus': { name: 'hippocampus', label: '海马体', description: '记忆形成和空间导航的核心结构，将短期记忆转化为长期记忆。含位置细胞。', functions: ['记忆形成', '空间导航', '学习', '情景记忆'] },
@@ -185,6 +186,8 @@ export const BRAIN_TREE: TreeNode[] = [
           { id: 'r-putamen', label: '壳核', regionName: 'putamen' },
           { id: 'r-pallidum', label: '苍白球', regionName: 'pallidum' },
           { id: 'r-accumbens', label: '伏隔核', regionName: 'accumbens' },
+          { id: 'r-subthalamic-nucleus', label: '丘脑下核（STN）', regionName: 'subthalamic-nucleus' },
+          { id: 'bg-substantia-nigra', label: '黑质', regionName: 'substantia-nigra' },
         ]
       },
       {
