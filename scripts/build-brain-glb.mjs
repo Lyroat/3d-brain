@@ -300,8 +300,10 @@ function main() {
     if (region.source === 'procedural') {
       let merged;
       if (region.name === 'substantia-nigra') {
-        const left = createEllipsoid(-12, -25, -40, 3, 6, 2, 12);
-        const right = createEllipsoid(12, -25, -40, 3, 6, 2, 12);
+        // MNI coords: brainstem Y=[-57.6, -18.2] Z=[-63.8, -8.3]
+        // SN in ventral midbrain (superior brainstem): Y~-28, Z~-16, small radii for full enclosure
+        const left = createEllipsoid(-5, -28, -16, 1.5, 2.5, 1.5, 12);
+        const right = createEllipsoid(5, -28, -16, 1.5, 2.5, 1.5, 12);
         merged = mergeGeometries([left, right]);
       }
       if (merged) {

@@ -62,6 +62,13 @@ const COLORS: Record<string, string> = {
   'corpus-callosum': '#e2e8f0',
 };
 
+// Virtual regions that don't have their own mesh but map to a parent mesh
+const MESH_ALIASES: Record<string, string> = {
+  'midbrain': 'brainstem',
+  'pons': 'brainstem',
+  'medulla': 'brainstem',
+};
+
 // Regions that are enclosed inside other structures and should be hidden by default
 const ENCLOSED_REGIONS: Record<string, string> = {
   'substantia-nigra': 'brainstem',
@@ -72,14 +79,18 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
   const { selectedNodeId, hoveredRegion, explodeAmount, setSelectedNodeId, setHoveredRegion } = useBrainStore();
   const selectedRegions = useSelectedRegions();
 
-  const isSelected = selectedRegions.has(name);
+  // Check if this mesh is selected directly OR via an alias (e.g., 'midbrain' → 'brainstem')
+  const isSelected = selectedRegions.has(name) ||
+    [...selectedRegions].some(r => MESH_ALIASES[r] === name);
   const isHovered = hoveredRegion === name;
   const hasSelection = selectedNodeId !== null;
 
   // For enclosed regions: only visible when exploded, selected, or hovered
   const enclosingRegion = ENCLOSED_REGIONS[name];
   const isEnclosed = !!enclosingRegion;
-  const enclosingIsSelected = enclosingRegion ? selectedRegions.has(enclosingRegion) : false;
+  const enclosingIsSelected = enclosingRegion
+    ? (selectedRegions.has(enclosingRegion) || [...selectedRegions].some(r => MESH_ALIASES[r] === enclosingRegion))
+    : false;
   const shouldRevealEnclosed = isEnclosed && (explodeAmount > 0.1 || isSelected || isHovered || enclosingIsSelected);
 
   const centroid = useMemo(() => {
