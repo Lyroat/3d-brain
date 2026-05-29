@@ -40,18 +40,21 @@ export function ControlPanel() {
 }
 
 function TreeItem({ node, depth }: { node: TreeNode; depth: number }) {
-  const { expandedNodes, toggleNode, selectedRegion, setSelectedRegion } = useBrainStore();
+  const { expandedNodes, toggleNode, selectedNodeId, setSelectedNodeId } = useBrainStore();
   const isExpanded = expandedNodes.has(node.id);
   const hasChildren = node.children && node.children.length > 0;
-  const isSelected = node.regionName === selectedRegion;
+  const isSelected = selectedNodeId === node.id;
 
   const handleClick = () => {
-    if (node.regionName) {
-      setSelectedRegion(isSelected ? null : node.regionName);
-    }
-    if (hasChildren) {
+    setSelectedNodeId(isSelected ? null : node.id);
+    if (hasChildren && !isExpanded) {
       toggleNode(node.id);
     }
+  };
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleNode(node.id);
   };
 
   return (
@@ -63,9 +66,11 @@ function TreeItem({ node, depth }: { node: TreeNode; depth: number }) {
         `}
         style={{ paddingLeft: `${depth * 12 + 8}px`, paddingRight: '8px', paddingTop: '5px', paddingBottom: '5px' }}
       >
-        {/* Expand/collapse icon */}
         {hasChildren ? (
-          <span className={`text-[10px] text-white/40 transition-transform inline-block w-3 ${isExpanded ? 'rotate-90' : ''}`}>
+          <span
+            onClick={handleToggle}
+            className={`text-[10px] text-white/40 transition-transform inline-block w-3 cursor-pointer hover:text-white/70 ${isExpanded ? 'rotate-90' : ''}`}
+          >
             ▶
           </span>
         ) : (
@@ -77,7 +82,6 @@ function TreeItem({ node, depth }: { node: TreeNode; depth: number }) {
         </span>
       </button>
 
-      {/* Children */}
       {hasChildren && isExpanded && (
         <div>
           {node.children!.map((child) => (

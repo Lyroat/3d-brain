@@ -4,7 +4,7 @@ import { useRef, useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useBrainStore, REGION_DATA } from '@/store/brain-store';
+import { useBrainStore, useSelectedRegions, REGION_DATA, BRAIN_TREE, findNodeById } from '@/store/brain-store';
 import regionCentroids from '../../public/models/brain-regions.json';
 
 // Colors by lobe/group for visual coherence
@@ -64,11 +64,12 @@ const COLORS: Record<string, string> = {
 
 function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.BufferGeometry }) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { selectedRegion, hoveredRegion, explodeAmount, setSelectedRegion, setHoveredRegion } = useBrainStore();
+  const { selectedNodeId, hoveredRegion, explodeAmount, setSelectedNodeId, setHoveredRegion } = useBrainStore();
+  const selectedRegions = useSelectedRegions();
 
-  const isSelected = selectedRegion === name;
+  const isSelected = selectedRegions.has(name);
   const isHovered = hoveredRegion === name;
-  const hasSelection = selectedRegion !== null;
+  const hasSelection = selectedNodeId !== null;
 
   const centroid = useMemo(() => {
     const data = (regionCentroids as Record<string, { centroid: number[] }>)[name];
@@ -121,7 +122,10 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
 
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
-    setSelectedRegion(isSelected ? null : name);
+    // Find the tree node id for this region (leaf node with regionName === name)
+    const nodeId = `r-${name}`;
+    const isSameNode = selectedNodeId === nodeId;
+    setSelectedNodeId(isSameNode ? null : nodeId);
   };
 
   const handlePointerOver = (e: ThreeEvent<PointerEvent>) => {
@@ -150,7 +154,7 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
 export function BrainModel() {
   const { scene } = useGLTF('/models/brain-atlas.glb');
   const groupRef = useRef<THREE.Group>(null);
-  const { setSelectedRegion } = useBrainStore();
+  const { setSelectedNodeId } = useBrainStore();
 
   const regions = useMemo(() => {
     const result: { name: string; geometry: THREE.BufferGeometry }[] = [];
@@ -166,7 +170,7 @@ export function BrainModel() {
   }, [scene]);
 
   const handleMiss = () => {
-    setSelectedRegion(null);
+    setSelectedNodeId(null);
   };
 
   return (

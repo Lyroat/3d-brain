@@ -216,23 +216,47 @@ export const BRAIN_TREE: TreeNode[] = [
   },
 ];
 
+// Collect all leaf regionName values from a tree node and its descendants
+export function getDescendantRegions(node: TreeNode): string[] {
+  const regions: string[] = [];
+  if (node.regionName) regions.push(node.regionName);
+  if (node.children) {
+    for (const child of node.children) {
+      regions.push(...getDescendantRegions(child));
+    }
+  }
+  return regions;
+}
+
+// Find a tree node by its id
+export function findNodeById(nodes: TreeNode[], id: string): TreeNode | null {
+  for (const node of nodes) {
+    if (node.id === id) return node;
+    if (node.children) {
+      const found = findNodeById(node.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 interface BrainState {
-  selectedRegion: string | null;
-  hoveredRegion: string | null;
+  selectedNodeId: string | null;   // tree node id that was clicked
+  hoveredRegion: string | null;    // single region name on 3D hover
   explodeAmount: number;
   expandedNodes: Set<string>;
-  setSelectedRegion: (region: string | null) => void;
+  setSelectedNodeId: (nodeId: string | null) => void;
   setHoveredRegion: (region: string | null) => void;
   setExplodeAmount: (amount: number) => void;
   toggleNode: (nodeId: string) => void;
 }
 
 export const useBrainStore = create<BrainState>((set) => ({
-  selectedRegion: null,
+  selectedNodeId: null,
   hoveredRegion: null,
   explodeAmount: 0,
   expandedNodes: new Set(['cerebrum']),
-  setSelectedRegion: (region) => set({ selectedRegion: region }),
+  setSelectedNodeId: (nodeId) => set({ selectedNodeId: nodeId }),
   setHoveredRegion: (region) => set({ hoveredRegion: region }),
   setExplodeAmount: (amount) => set({ explodeAmount: amount }),
   toggleNode: (nodeId) => set((state) => {
@@ -242,3 +266,12 @@ export const useBrainStore = create<BrainState>((set) => ({
     return { expandedNodes: next };
   }),
 }));
+
+// Hook to get the set of currently highlighted region names
+export function useSelectedRegions(): Set<string> {
+  const { selectedNodeId } = useBrainStore();
+  if (!selectedNodeId) return new Set();
+  const node = findNodeById(BRAIN_TREE, selectedNodeId);
+  if (!node) return new Set();
+  return new Set(getDescendantRegions(node));
+}
