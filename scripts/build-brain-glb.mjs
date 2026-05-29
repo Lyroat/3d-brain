@@ -81,8 +81,10 @@ const REGION_MAP = [
   // === BASAL GANGLIA (additional) ===
   { name: 'subthalamic-nucleus', source: 'procedural', merge: 'both', parcels: [] },
 
-  // === BRAINSTEM ===
-  { name: 'brainstem', source: 'subcortical', merge: 'both', parcels: ['Brain-Stem'] },
+  // === BRAINSTEM (split by Z-coordinate into 3 parts) ===
+  { name: 'midbrain-mesh', source: 'brainstem-split', merge: 'both', parcels: ['Brain-Stem'], zRange: [-24, Infinity] },
+  { name: 'pons-mesh', source: 'brainstem-split', merge: 'both', parcels: ['Brain-Stem'], zRange: [-40, -24] },
+  { name: 'medulla-mesh', source: 'brainstem-split', merge: 'both', parcels: ['Brain-Stem'], zRange: [-Infinity, -40] },
   { name: 'substantia-nigra', source: 'procedural', merge: 'both', parcels: [] },
 
   // === CEREBELLUM ===
@@ -183,6 +185,33 @@ function createEllipsoid(cx, cy, cz, rx, ry, rz, segments = 16) {
   }
 
   return { vertices: new Float32Array(vertices), indices: new Uint32Array(indices) };
+}
+
+// --- Split mesh by Z-coordinate range ---
+function splitMeshByZ(geometry, zMin, zMax) {
+  const { vertices, indices } = geometry;
+  const newIndices = [];
+  const vertexMap = new Map();
+  const newVertices = [];
+
+  for (let i = 0; i < indices.length; i += 3) {
+    const i0 = indices[i], i1 = indices[i + 1], i2 = indices[i + 2];
+    // Use centroid of triangle to determine assignment
+    const cz = (vertices[i0 * 3 + 2] + vertices[i1 * 3 + 2] + vertices[i2 * 3 + 2]) / 3;
+    if (cz >= zMin && cz < zMax) {
+      const mapped = [i0, i1, i2].map(idx => {
+        if (!vertexMap.has(idx)) {
+          vertexMap.set(idx, newVertices.length / 3);
+          newVertices.push(vertices[idx * 3], vertices[idx * 3 + 1], vertices[idx * 3 + 2]);
+        }
+        return vertexMap.get(idx);
+      });
+      newIndices.push(...mapped);
+    }
+  }
+
+  if (newIndices.length === 0) return null;
+  return { vertices: new Float32Array(newVertices), indices: new Uint32Array(newIndices) };
 }
 
 // --- Compute normals ---
@@ -300,6 +329,25 @@ function main() {
 
   for (const region of REGION_MAP) {
     // Handle procedural geometry
+    if (region.source === 'brainstem-split') {
+      const dir = SUBCORTICAL_DIR;
+      const objFile = findObjFile(dir, region.parcels[0]);
+      if (!objFile) {
+        console.warn(`  ⚠️  Missing: ${region.parcels[0]} for ${region.name}`);
+        continue;
+      }
+      const fullGeo = parseOBJ(objFile);
+      const splitGeo = splitMeshByZ(fullGeo, region.zRange[0], region.zRange[1]);
+      if (!splitGeo || splitGeo.indices.length === 0) {
+        console.warn(`  ⏭️  Skipped: ${region.name} (no triangles in Z range)`);
+        continue;
+      }
+      regionGeometries[region.name] = splitGeo;
+      allVertices.push(splitGeo.vertices);
+      console.log(`  ✅ ${region.name}: ${splitGeo.indices.length / 3} tris, ${splitGeo.vertices.length / 3} verts (brainstem split Z=[${region.zRange[0]}, ${region.zRange[1]}])`);
+      continue;
+    }
+
     if (region.source === 'procedural') {
       let merged;
       if (region.name === 'subthalamic-nucleus') {

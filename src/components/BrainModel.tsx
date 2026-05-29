@@ -4,7 +4,7 @@ import { useRef, useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { useFrame, ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useBrainStore, useSelectedRegions, REGION_DATA, BRAIN_TREE, findNodeById } from '@/store/brain-store';
+import { useBrainStore, useSelectedRegions, REGION_DATA } from '@/store/brain-store';
 import regionCentroids from '../../public/models/brain-regions.json';
 
 // Colors by lobe/group for visual coherence
@@ -55,7 +55,9 @@ const COLORS: Record<string, string> = {
   'thalamus': '#eab308',
   'hypothalamus': '#fbbf24',
   // Brainstem
-  'brainstem': '#78716c',
+  'midbrain-mesh': '#78716c',
+  'pons-mesh': '#a8a29e',
+  'medulla-mesh': '#57534e',
   'substantia-nigra': '#44403c',
   // Cerebellum
   'cerebellum': '#059669',
@@ -63,16 +65,9 @@ const COLORS: Record<string, string> = {
   'corpus-callosum': '#e2e8f0',
 };
 
-// Virtual regions that don't have their own mesh but map to a parent mesh
-const MESH_ALIASES: Record<string, string> = {
-  'midbrain': 'brainstem',
-  'pons': 'brainstem',
-  'medulla': 'brainstem',
-};
-
 // Regions that are enclosed inside other structures and should be hidden by default
 const ENCLOSED_REGIONS: Record<string, string> = {
-  'substantia-nigra': 'brainstem',
+  'substantia-nigra': 'midbrain-mesh',
   'subthalamic-nucleus': 'thalamus',
 };
 
@@ -81,18 +76,14 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
   const { selectedNodeId, hoveredRegion, explodeAmount, setSelectedNodeId, setHoveredRegion } = useBrainStore();
   const selectedRegions = useSelectedRegions();
 
-  // Check if this mesh is selected directly OR via an alias (e.g., 'midbrain' → 'brainstem')
-  const isSelected = selectedRegions.has(name) ||
-    [...selectedRegions].some(r => MESH_ALIASES[r] === name);
+  const isSelected = selectedRegions.has(name);
   const isHovered = hoveredRegion === name;
   const hasSelection = selectedNodeId !== null;
 
   // For enclosed regions: only visible when exploded, selected, or hovered
   const enclosingRegion = ENCLOSED_REGIONS[name];
   const isEnclosed = !!enclosingRegion;
-  const enclosingIsSelected = enclosingRegion
-    ? (selectedRegions.has(enclosingRegion) || [...selectedRegions].some(r => MESH_ALIASES[r] === enclosingRegion))
-    : false;
+  const enclosingIsSelected = enclosingRegion ? selectedRegions.has(enclosingRegion) : false;
   const shouldRevealEnclosed = isEnclosed && (explodeAmount > 0.1 || isSelected || isHovered || enclosingIsSelected);
 
   const centroid = useMemo(() => {

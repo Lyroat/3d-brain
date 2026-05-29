@@ -64,10 +64,9 @@ export const REGION_DATA: Record<string, RegionInfo> = {
   'hypothalamus': { name: 'hypothalamus', label: '下丘脑', description: '调节内分泌系统、自主神经功能、体温、饥饿、口渴和昼夜节律。虽小却是生命维持的关键。', functions: ['内分泌调节', '体温调控', '饥饿/口渴', '昼夜节律', '情绪反应'] },
 
   // === 脑干 ===
-  'brainstem': { name: 'brainstem', label: '脑干', description: '连接大脑与脊髓的核心结构，控制呼吸、心跳、血压等基本生命功能。由中脑、脑桥和延髓三部分组成。', functions: ['呼吸调控', '心率控制', '觉醒', '反射'] },
-  'midbrain': { name: 'midbrain', label: '中脑', description: '脑干最上部，连接间脑与脑桥。包含上丘（视觉反射）、下丘（听觉中继）、黑质、红核等结构。参与眼动控制、听觉视觉反射和运动调节。', functions: ['眼动控制', '视听反射', '运动调节', '觉醒'] },
-  'pons': { name: 'pons', label: '脑桥', description: '脑干中部，连接中脑与延髓，是小脑与大脑之间的信息桥梁。包含多个颅神经核，参与呼吸调节、面部感觉和运动。', functions: ['小脑通信', '呼吸调节', '面部运动', '睡眠-觉醒'] },
-  'medulla': { name: 'medulla', label: '延髓', description: '脑干最下部，连接脑桥与脊髓。包含心血管中枢、呼吸中枢和呕吐中枢等生命攸关的调控中心。', functions: ['心血管调控', '呼吸节律', '吞咽反射', '呕吐反射'] },
+  'midbrain-mesh': { name: 'midbrain-mesh', label: '中脑', description: '脑干最上部，连接间脑与脑桥。包含上丘（视觉反射）、下丘（听觉中继）、黑质、红核等结构。参与眼动控制、听觉视觉反射和运动调节。', functions: ['眼动控制', '视听反射', '运动调节', '觉醒'] },
+  'pons-mesh': { name: 'pons-mesh', label: '脑桥', description: '脑干中部，连接中脑与延髓，是小脑与大脑之间的信息桥梁。包含多个颅神经核，参与呼吸调节、面部感觉和运动。', functions: ['小脑通信', '呼吸调节', '面部运动', '睡眠-觉醒'] },
+  'medulla-mesh': { name: 'medulla-mesh', label: '延髓', description: '脑干最下部，连接脑桥与脊髓。包含心血管中枢、呼吸中枢和呕吐中枢等生命攸关的调控中心。', functions: ['心血管调控', '呼吸节律', '吞咽反射', '呕吐反射'] },
   'substantia-nigra': { name: 'substantia-nigra', label: '黑质', description: '位于中脑腹侧内部，是多巴胺能神经元的主要来源。分为致密部（产生多巴胺）和网状部（运动输出）。退化导致帕金森病。', functions: ['多巴胺分泌', '运动启动', '奖赏信号', '运动抑制'] },
 
   // === 小脑 ===
@@ -215,14 +214,14 @@ export const BRAIN_TREE: TreeNode[] = [
     ]
   },
   {
-    id: 'brainstem-group', label: '脑干', regionName: 'brainstem', children: [
+    id: 'brainstem-group', label: '脑干', children: [
       {
-        id: 'midbrain', label: '中脑', regionName: 'midbrain', children: [
+        id: 'midbrain', label: '中脑', regionName: 'midbrain-mesh', children: [
           { id: 'r-substantia-nigra', label: '黑质', regionName: 'substantia-nigra' },
         ]
       },
-      { id: 'pons', label: '脑桥', regionName: 'pons' },
-      { id: 'medulla', label: '延髓', regionName: 'medulla' },
+      { id: 'pons', label: '脑桥', regionName: 'pons-mesh' },
+      { id: 'medulla', label: '延髓', regionName: 'medulla-mesh' },
     ]
   },
 ];
