@@ -62,6 +62,11 @@ const COLORS: Record<string, string> = {
   'corpus-callosum': '#e2e8f0',
 };
 
+// Regions that are enclosed inside other structures and should be hidden by default
+const ENCLOSED_REGIONS: Record<string, string> = {
+  'substantia-nigra': 'brainstem',
+};
+
 function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.BufferGeometry }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const { selectedNodeId, hoveredRegion, explodeAmount, setSelectedNodeId, setHoveredRegion } = useBrainStore();
@@ -70,6 +75,12 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
   const isSelected = selectedRegions.has(name);
   const isHovered = hoveredRegion === name;
   const hasSelection = selectedNodeId !== null;
+
+  // For enclosed regions: only visible when exploded, selected, or hovered
+  const enclosingRegion = ENCLOSED_REGIONS[name];
+  const isEnclosed = !!enclosingRegion;
+  const enclosingIsSelected = enclosingRegion ? selectedRegions.has(enclosingRegion) : false;
+  const shouldRevealEnclosed = isEnclosed && (explodeAmount > 0.1 || isSelected || isHovered || enclosingIsSelected);
 
   const centroid = useMemo(() => {
     const data = (regionCentroids as Record<string, { centroid: number[] }>)[name];
@@ -98,11 +109,13 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
     const targetPos = centroid.clone().multiplyScalar(explodeAmount * 0.5);
     meshRef.current.position.lerp(targetPos, 0.08);
 
-    // Opacity & emissive based on selection state
     const mat = meshRef.current.material as THREE.MeshPhysicalMaterial;
 
     let targetOpacity = 1;
-    if (hasSelection && !isSelected && !isHovered) {
+
+    if (isEnclosed && !shouldRevealEnclosed) {
+      targetOpacity = 0;
+    } else if (hasSelection && !isSelected && !isHovered) {
       targetOpacity = 0.15;
     } else if (isHovered && !isSelected) {
       targetOpacity = 0.9;

@@ -71,10 +71,11 @@ export function InfoPanel() {
   if (!selectedNode) return null;
 
   const breadcrumb = findPathToNode(BRAIN_TREE, selectedNodeId!);
-  const isLeaf = selectedNode.regionName && REGION_DATA[selectedNode.regionName];
+  const hasChildren = selectedNode.children && selectedNode.children.length > 0;
+  const selfInfo = selectedNode.regionName ? REGION_DATA[selectedNode.regionName] : null;
 
-  if (isLeaf) {
-    const info = REGION_DATA[selectedNode.regionName!];
+  // Pure leaf node (no children): show single region detail
+  if (!hasChildren && selfInfo) {
     return (
       <div className="absolute top-6 right-6 w-80 rounded-2xl bg-[#111128]/90 backdrop-blur-xl border border-white/10 p-6 shadow-2xl">
         {breadcrumb.length > 1 && (
@@ -86,13 +87,13 @@ export function InfoPanel() {
             ))}
           </div>
         )}
-        <h2 className="text-xl font-bold text-white mb-1">{info.label}</h2>
-        <p className="text-xs text-white/40 font-mono mb-3">{info.name}</p>
-        <p className="text-sm text-white/70 leading-relaxed mb-4">{info.description}</p>
+        <h2 className="text-xl font-bold text-white mb-1">{selfInfo.label}</h2>
+        <p className="text-xs text-white/40 font-mono mb-3">{selfInfo.name}</p>
+        <p className="text-sm text-white/70 leading-relaxed mb-4">{selfInfo.description}</p>
         <div>
           <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">主要功能</h3>
           <div className="flex flex-wrap gap-1.5">
-            {info.functions.map((fn) => (
+            {selfInfo.functions.map((fn) => (
               <span key={fn} className="text-xs px-2 py-1 rounded-md bg-white/5 text-white/70 border border-white/10">{fn}</span>
             ))}
           </div>
@@ -101,9 +102,13 @@ export function InfoPanel() {
     );
   }
 
-  // Parent node: show group info with child regions listed
+  // Parent node (with or without own regionName): show self info + child list
   const childRegionNames = getDescendantRegions(selectedNode);
-  const childInfos = childRegionNames.map(r => REGION_DATA[r]).filter(Boolean);
+  // Exclude self from child list if it has its own regionName
+  const childInfos = childRegionNames
+    .filter(r => r !== selectedNode.regionName)
+    .map(r => REGION_DATA[r])
+    .filter(Boolean);
 
   return (
     <div className="absolute top-6 right-6 w-80 rounded-2xl bg-[#111128]/90 backdrop-blur-xl border border-white/10 p-6 shadow-2xl max-h-[calc(100vh-3rem)] overflow-y-auto scrollbar-thin">
@@ -116,17 +121,40 @@ export function InfoPanel() {
           ))}
         </div>
       )}
-      <h2 className="text-xl font-bold text-white mb-1">{selectedNode.label}</h2>
-      <p className="text-xs text-white/40 mb-4">包含 {childInfos.length} 个子结构</p>
 
-      <div className="space-y-2.5">
-        {childInfos.map((info) => (
-          <div key={info.name} className="rounded-lg bg-white/5 border border-white/5 p-3">
-            <h4 className="text-sm font-medium text-white/85 mb-1">{info.label}</h4>
-            <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{info.description}</p>
+      {/* Self info if the node has its own region data */}
+      {selfInfo ? (
+        <>
+          <h2 className="text-xl font-bold text-white mb-1">{selfInfo.label}</h2>
+          <p className="text-sm text-white/70 leading-relaxed mb-4">{selfInfo.description}</p>
+          <div className="mb-4">
+            <div className="flex flex-wrap gap-1.5">
+              {selfInfo.functions.map((fn) => (
+                <span key={fn} className="text-xs px-2 py-1 rounded-md bg-white/5 text-white/70 border border-white/10">{fn}</span>
+              ))}
+            </div>
           </div>
-        ))}
-      </div>
+        </>
+      ) : (
+        <h2 className="text-xl font-bold text-white mb-3">{selectedNode.label}</h2>
+      )}
+
+      {/* Child structures */}
+      {childInfos.length > 0 && (
+        <>
+          <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+            包含结构（{childInfos.length}）
+          </h3>
+          <div className="space-y-2.5">
+            {childInfos.map((info) => (
+              <div key={info.name} className="rounded-lg bg-white/5 border border-white/5 p-3">
+                <h4 className="text-sm font-medium text-white/85 mb-1">{info.label}</h4>
+                <p className="text-xs text-white/50 leading-relaxed line-clamp-2">{info.description}</p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
