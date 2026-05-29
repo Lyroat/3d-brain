@@ -78,8 +78,10 @@ const REGION_MAP = [
   { name: 'thalamus', source: 'subcortical', merge: 'both-separate', parcels: { lh: ['Left-Thalamus-Proper'], rh: ['Right-Thalamus-Proper'] } },
   { name: 'hypothalamus', source: 'subcortical', merge: 'both-separate', parcels: { lh: ['Left-VentralDC'], rh: ['Right-VentralDC'] } },
 
-  // === BASAL GANGLIA (additional) ===
+  // === DIENCEPHALON (procedural additions) ===
   { name: 'subthalamic-nucleus', source: 'procedural', merge: 'both', parcels: [] },
+  { name: 'epithalamus', source: 'procedural', merge: 'both', parcels: [] },
+  { name: 'metathalamus', source: 'procedural', merge: 'both', parcels: [] },
 
   // === BRAINSTEM (split by Z-coordinate into 3 parts) ===
   { name: 'midbrain-mesh', source: 'brainstem-split', merge: 'both', parcels: ['Brain-Stem'], zRange: [-24, Infinity] },
@@ -351,15 +353,34 @@ function main() {
     if (region.source === 'procedural') {
       let merged;
       if (region.name === 'subthalamic-nucleus') {
-        // STN: small lens-shaped nucleus ventral to thalamus, MNI ~(±12, -15, -5)
-        const left = createEllipsoid(-12, -15, -5, 2, 3, 1.2, 10);
-        const right = createEllipsoid(12, -15, -5, 2, 3, 1.2, 10);
+        // STN: small lens-shaped nucleus ventral to thalamus
+        // Thalamus Y=[-36,0] Z=[-16,6], place STN inside lower-central area
+        const left = createEllipsoid(-12, -18, -8, 1.5, 2.5, 1, 10);
+        const right = createEllipsoid(12, -18, -8, 1.5, 2.5, 1, 10);
         merged = mergeGeometries([left, right]);
       }
+      if (region.name === 'epithalamus') {
+        // Epithalamus: pineal gland + habenula, dorsal-posterior to thalamus
+        // Midline structure, above and behind thalamus center
+        const pineal = createEllipsoid(0, -28, 4, 1.5, 1.5, 1.5, 10);
+        const habLeft = createEllipsoid(-3, -26, 3, 1, 1.5, 0.8, 8);
+        const habRight = createEllipsoid(3, -26, 3, 1, 1.5, 0.8, 8);
+        merged = mergeGeometries([pineal, habLeft, habRight]);
+      }
+      if (region.name === 'metathalamus') {
+        // Metathalamus: medial + lateral geniculate bodies, posterior-inferior thalamus
+        // MGB (auditory relay) and LGB (visual relay)
+        const leftMGB = createEllipsoid(-15, -30, -4, 1.5, 2, 1.2, 10);
+        const rightMGB = createEllipsoid(15, -30, -4, 1.5, 2, 1.2, 10);
+        const leftLGB = createEllipsoid(-20, -28, -2, 1.5, 2, 1.2, 10);
+        const rightLGB = createEllipsoid(20, -28, -2, 1.5, 2, 1.2, 10);
+        merged = mergeGeometries([leftMGB, rightMGB, leftLGB, rightLGB]);
+      }
       if (region.name === 'substantia-nigra') {
-        // SN in ventral midbrain, fully inside brainstem
-        const left = createEllipsoid(-5, -28, -16, 1.5, 2.5, 1.5, 12);
-        const right = createEllipsoid(5, -28, -16, 1.5, 2.5, 1.5, 12);
+        // Midbrain Y=[-43.4,-23.8] Z=[-24,-8.3], center ~(0,-33.6,-16.2)
+        // Place SN deep inside midbrain center, very small radii
+        const left = createEllipsoid(-4, -33, -16, 1, 1.8, 1, 10);
+        const right = createEllipsoid(4, -33, -16, 1, 1.8, 1, 10);
         merged = mergeGeometries([left, right]);
       }
       if (merged) {

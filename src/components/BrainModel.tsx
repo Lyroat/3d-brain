@@ -47,13 +47,15 @@ const COLORS: Record<string, string> = {
   'putamen': '#d946ef',
   'pallidum': '#fb923c',
   'accumbens': '#f43f5e',
-  'subthalamic-nucleus': '#ff6b35',
   // Limbic
   'hippocampus': '#f97316',
   'amygdala': '#ef4444',
   // Diencephalon
   'thalamus': '#eab308',
+  'subthalamic-nucleus': '#ff6b35',
+  'epithalamus': '#ca8a04',
   'hypothalamus': '#fbbf24',
+  'metathalamus': '#d97706',
   // Brainstem
   'midbrain-mesh': '#78716c',
   'pons-mesh': '#a8a29e',
@@ -69,6 +71,8 @@ const COLORS: Record<string, string> = {
 const ENCLOSED_REGIONS: Record<string, string> = {
   'substantia-nigra': 'midbrain-mesh',
   'subthalamic-nucleus': 'thalamus',
+  'epithalamus': 'thalamus',
+  'metathalamus': 'thalamus',
 };
 
 function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.BufferGeometry }) {
@@ -116,19 +120,24 @@ function BrainRegionMesh({ name, geometry }: { name: string; geometry: THREE.Buf
     const mat = meshRef.current.material as THREE.MeshPhysicalMaterial;
 
     let targetOpacity = 1;
+    let lerpSpeed = 0.12;
 
     if (isEnclosed && !shouldRevealEnclosed) {
       targetOpacity = 0;
+      lerpSpeed = 0.3;
+    } else if (isEnclosed && shouldRevealEnclosed) {
+      targetOpacity = 1;
+      lerpSpeed = 0.4;
     } else if (hasSelection && !isSelected && !isHovered) {
       targetOpacity = 0.15;
     } else if (isHovered && !isSelected) {
       targetOpacity = 0.9;
     }
-    mat.opacity += (targetOpacity - mat.opacity) * 0.1;
+    mat.opacity += (targetOpacity - mat.opacity) * lerpSpeed;
 
     if (isSelected) {
       mat.emissive.set(color);
-      mat.emissiveIntensity += (0.3 - mat.emissiveIntensity) * 0.1;
+      mat.emissiveIntensity += (0.4 - mat.emissiveIntensity) * 0.2;
     } else if (isHovered) {
       mat.emissive.set(color);
       mat.emissiveIntensity += (0.15 - mat.emissiveIntensity) * 0.1;

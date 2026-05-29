@@ -53,15 +53,17 @@ export const REGION_DATA: Record<string, RegionInfo> = {
   'putamen': { name: 'putamen', label: '壳核', description: '基底神经节的核心结构，与尾状核合称纹状体，参与运动学习和执行。', functions: ['运动学习', '运动执行', '强化学习'] },
   'pallidum': { name: 'pallidum', label: '苍白球', description: '基底神经节的输出结构，调节运动的启动和抑制。', functions: ['运动调节', '动作选择', '运动抑制'] },
   'accumbens': { name: 'accumbens', label: '伏隔核', description: '奖赏回路的核心，介导快乐、动机和成瘾行为。属于腹侧纹状体。', functions: ['奖赏处理', '动机', '快乐体验', '成瘾'] },
-  'subthalamic-nucleus': { name: 'subthalamic-nucleus', label: '丘脑下核（STN）', description: '位于丘脑腹侧、内囊内侧的小型透镜状核团。在基底神经节间接通路中起关键兴奋性驱动作用，调节运动抑制。深部脑刺激（DBS）治疗帕金森病的主要靶点。', functions: ['运动抑制', '冲动控制', '决策阈值', 'DBS靶点'] },
 
   // === 边缘系统 ===
   'hippocampus': { name: 'hippocampus', label: '海马体', description: '记忆形成和空间导航的核心结构，将短期记忆转化为长期记忆。含位置细胞。', functions: ['记忆形成', '空间导航', '学习', '情景记忆'] },
   'amygdala': { name: 'amygdala', label: '杏仁核', description: '情绪处理中枢，尤其参与恐惧和威胁检测。也参与情绪记忆的巩固。', functions: ['恐惧处理', '情绪记忆', '威胁检测', '社会情感'] },
 
   // === 间脑 ===
-  'thalamus': { name: 'thalamus', label: '丘脑', description: '感觉信息的中继站（除嗅觉外），将信息传递到大脑皮层相应区域。也参与意识和注意。', functions: ['感觉中继', '运动信号', '意识调节', '注意力'] },
-  'hypothalamus': { name: 'hypothalamus', label: '下丘脑', description: '调节内分泌系统、自主神经功能、体温、饥饿、口渴和昼夜节律。虽小却是生命维持的关键。', functions: ['内分泌调节', '体温调控', '饥饿/口渴', '昼夜节律', '情绪反应'] },
+  'thalamus': { name: 'thalamus', label: '背侧丘脑', description: '间脑最大的结构，是几乎所有感觉信息（除嗅觉外）传入大脑皮层的中继站。包含多个核团，参与感觉整合、运动调节、意识和注意力调节。', functions: ['感觉中继', '运动信号', '意识调节', '注意力'] },
+  'subthalamic-nucleus': { name: 'subthalamic-nucleus', label: '底丘脑（丘脑底核）', description: '位于丘脑腹侧的小型双凸透镜状核团。在基底神经节间接通路中起关键兴奋性驱动作用，是深部脑刺激（DBS）治疗帕金森病的主要靶点。也称腹侧丘脑的一部分。', functions: ['运动抑制', '冲动控制', '决策阈值', 'DBS靶点'] },
+  'epithalamus': { name: 'epithalamus', label: '上丘脑', description: '间脑的背侧部分，包含松果体（分泌褪黑素调节昼夜节律）和缰核（参与厌恶学习和奖惩决策）。是神经-内分泌交互的关键区域。', functions: ['昼夜节律', '褪黑素分泌', '厌恶学习', '奖惩决策'] },
+  'hypothalamus': { name: 'hypothalamus', label: '下丘脑', description: '间脑的腹侧部分，调节内分泌系统、自主神经功能、体温、饥饿、口渴和昼夜节律。虽小却是生命维持的关键中枢。', functions: ['内分泌调节', '体温调控', '饥饿/口渴', '昼夜节律', '情绪反应'] },
+  'metathalamus': { name: 'metathalamus', label: '后丘脑', description: '丘脑的后部延伸，包含内侧膝状体（听觉中继站）和外侧膝状体（视觉中继站）。是视觉和听觉信息从感受器到初级皮层的关键中继。', functions: ['视觉中继', '听觉中继', '感觉传导'] },
 
   // === 脑干 ===
   'midbrain-mesh': { name: 'midbrain-mesh', label: '中脑', description: '脑干最上部，连接间脑与脑桥。包含上丘（视觉反射）、下丘（听觉中继）、黑质、红核等结构。参与眼动控制、听觉视觉反射和运动调节。', functions: ['眼动控制', '视听反射', '运动调节', '觉醒'] },
@@ -184,8 +186,7 @@ export const BRAIN_TREE: TreeNode[] = [
           { id: 'r-caudate', label: '尾状核', regionName: 'caudate' },
           { id: 'r-putamen', label: '壳核', regionName: 'putamen' },
           { id: 'r-pallidum', label: '苍白球', regionName: 'pallidum' },
-          { id: 'r-accumbens', label: '伏隔核', regionName: 'accumbens' },
-          { id: 'r-subthalamic-nucleus', label: '丘脑下核（STN）', regionName: 'subthalamic-nucleus' },
+          { id: 'bg-subthalamic', label: '丘脑底核', regionName: 'subthalamic-nucleus' },
           { id: 'bg-substantia-nigra', label: '黑质', regionName: 'substantia-nigra' },
         ]
       },
@@ -193,6 +194,7 @@ export const BRAIN_TREE: TreeNode[] = [
         id: 'limbic', label: '边缘系统', children: [
           { id: 'r-hippocampus', label: '海马体', regionName: 'hippocampus' },
           { id: 'r-amygdala', label: '杏仁核', regionName: 'amygdala' },
+          { id: 'r-accumbens', label: '伏隔核', regionName: 'accumbens' },
         ]
       },
       {
@@ -209,8 +211,11 @@ export const BRAIN_TREE: TreeNode[] = [
   },
   {
     id: 'diencephalon', label: '间脑', children: [
-      { id: 'r-thalamus', label: '丘脑', regionName: 'thalamus' },
+      { id: 'r-thalamus', label: '背侧丘脑', regionName: 'thalamus' },
+      { id: 'r-subthalamic-nucleus', label: '底丘脑（丘脑底核）', regionName: 'subthalamic-nucleus' },
+      { id: 'r-epithalamus', label: '上丘脑', regionName: 'epithalamus' },
       { id: 'r-hypothalamus', label: '下丘脑', regionName: 'hypothalamus' },
+      { id: 'r-metathalamus', label: '后丘脑', regionName: 'metathalamus' },
     ]
   },
   {
